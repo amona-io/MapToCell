@@ -14,6 +14,7 @@ func RequestAPI(coords string) string {
 	queryURL := queryURLWrapper(coords)
 	res := getResponse(queryURL)
 	resBody := resBodyToString(res.Body)
+	defer res.Body.Close()
 	return resBody
 }
 

@@ -7,6 +7,7 @@ import (
 	"handlegeo/utils"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type Array []*cell
@@ -41,37 +42,87 @@ func NewCell(east float64, north float64) (*cell, error) {
 	// Using coords of center, get data of the Cell
 	// If there are no data in Cell, it will return error
 	data, statusCode := Cell.getCellData()
+
 	if statusCode != 0 {
 		return nil, errNoData
 	}
 	Cell.IsInRange = true
 	Cell.CenterCity = data
-	fmt.Println(data)
 	return &Cell, nil
 }
+
+func GoRoCell(east float64, north float64, c chan <- *cell)  {
+	center := fmt.Sprintf("%.2f,%.2f",east, north)
+	leftTop := fmt.Sprintf("%.2f,%.2f",east-50.00,north+50.00)
+	rightTop := fmt.Sprintf("%.2f,%.2f",east+50.00,north+50.00)
+	leftBottom := fmt.Sprintf("%.2f,%.2f",east-50.00,north-50.00)
+	rightBottom := fmt.Sprintf("%.2f,%.2f",east+50.00,north-50.00)
+	Cell := cell{
+		Center		: center,
+		LeftTop		: leftTop,
+		RightTop	: rightTop,
+		LeftBottom	: leftBottom,
+		RightBottom	: rightBottom,
+	}
+	// Using coords of center, get data of the Cell
+	// If there are no data in Cell, it will return error
+	data, statusCode := Cell.getCellData()
+
+	if statusCode == 0 {
+		Cell.IsInRange = true
+		Cell.CenterCity = data
+		c <- &Cell
+	}
+}
+
 
 // NextCell is recursive func and It retrieve Pointer of Cell(Previous Cell) and Array of these Cell.
 // Once this func retrieve Pointer of Cell, It finds next cell in the "West Side" of the Previous Cell
 // until no more area information are found.
-func NextCell(prevCell *cell, cellArray *Array) func() {
-	var err error = nil
+func NextCell(prevCell *cell, cellArray *Array) {
+	//var err error = nil
 	centerCoordsArray := strings.Split(prevCell.Center, ",")
+
 	east, north := centerCoordsArray[0], centerCoordsArray[1]
 	eastFloat, err := strconv.ParseFloat(east, 64)
 	utils.CheckErr(err)
 	northFloat, err := strconv.ParseFloat(north, 64)
 	utils.CheckErr(err)
-	for err == nil {
-		nextCell, err := NewCell(eastFloat+100, northFloat)
-		if err != nil {
-			err = errNoData
-			fmt.Println("No more data")
-			break
+
+	eastEdge := 960000.00
+	northEdge := 1960000.00
+	margin := 100.00
+
+	ch := make(chan *cell)
+	length := 0
+
+	// 재귀 > 범위 지정하고, 그 범위를 도는 걸로 함수 변경  (테스트 : 950000, 1950000 ~ 900000, 1900000)
+	// Next Cell 함수 내에서 채널 만들고, (함수명 알맞게 변경)
+	// 채널에 쿼리 결과를 담는 식으로 New Cell 과 유사한 함수 생성
+	// 본 함수에서 만든 채널에 > 셀 정보 불러오는 함수로 채널을 인자로 넘겨줘서 그 채널에 데이터 담고
+
+	for eastCoord, northCoord := eastFloat, northFloat; eastCoord <= eastEdge && northCoord <= northEdge; {
+		time.Sleep(time.Microsecond*350)
+		fmt.Printf("가로좌표: %.2f // 세로좌표: %.2f\n", eastCoord, northCoord)
+		length += 1
+		if eastCoord == eastEdge {	// eastCoord : 초기화 // northCoord : + 100
+			if northCoord == northEdge {
+				break
+			}
+			go GoRoCell(eastCoord, northCoord+margin, ch)
+			eastCoord = 950000
+			northCoord += margin
+
+		} else {
+			go GoRoCell(eastCoord+margin, northCoord, ch)
+			eastCoord += margin
 		}
-		*cellArray = append(*cellArray, nextCell)
-		return NextCell(nextCell, cellArray)
 	}
-	return nil
+
+	for i:=1 ; i < length; i++ {
+		a := <- ch
+		*cellArray = append(*cellArray, a)
+	}
 }
 
 // getCellData is private func in package "cell" and it retrieve cell struct as argument
