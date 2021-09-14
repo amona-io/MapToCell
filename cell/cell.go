@@ -91,7 +91,7 @@ func NextCell(prevCell *cell, cellArray *Array) {
 
 	eastEdge := 960000.00
 	northEdge := 1960000.00
-	margin := 100.00
+	margin := 10000.00
 
 	ch := make(chan *cell)
 	length := 0
@@ -151,6 +151,7 @@ func getAreaInfo(jsonData map[string]interface{}) string {
 	areaInfoSecond := rawAreaData.(map[string]interface{})["area2"].(map[string]interface{})["name"]
 	areaInfoThird := rawAreaData.(map[string]interface{})["area3"].(map[string]interface{})["name"]
 	areaInfoFourth := rawAreaData.(map[string]interface{})["area4"].(map[string]interface{})["name"]
-	areaInfo := fmt.Sprintf("%s %s %s %s", areaInfoFirst, areaInfoSecond, areaInfoThird, areaInfoFourth)
+	rawAreaInfo := fmt.Sprintf("%s %s %s %s", areaInfoFirst, areaInfoSecond, areaInfoThird, areaInfoFourth)
+	areaInfo := fmt.Sprintf("%s", strings.TrimRight(rawAreaInfo, " "))
 	return areaInfo
 }
