@@ -46,4 +46,3 @@ func resBodyToString(resBody io.ReadCloser) string {
 	bodyString := string(resBodyBytes)
 	return bodyString
 }
-
