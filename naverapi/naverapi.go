@@ -31,7 +31,6 @@ func getResponse(queryURL string) *http.Response {
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", queryURL, nil)
 	utils.CheckErr(err)
-
 	req.Header.Add("X-NCP-APIGW-API-KEY-ID", _const.NCPKEYID)
 	req.Header.Add("X-NCP-APIGW-API-KEY", _const.NCPKEY)
 	res, err := client.Do(req)

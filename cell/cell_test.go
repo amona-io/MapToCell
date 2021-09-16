@@ -13,7 +13,6 @@ func TestNewCell(t *testing.T) {
 
 	actual, _ := cell.NewCell(east, north)
 	expected := &cell.Cell{
-		CellNum: 0,
 		LeftTop: fmt.Sprintf("%.2f,%.2f",east-50.00,north+50.00),
 		RightTop: fmt.Sprintf("%.2f,%.2f",east+50.00,north+50.00),
 		LeftBottom: fmt.Sprintf("%.2f,%.2f",east-50.00,north-50.00),
