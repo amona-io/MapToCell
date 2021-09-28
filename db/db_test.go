@@ -1,15 +1,13 @@
 package db
 
-import "testing"
+import (
+	"github.com/stretchr/testify/assert"
+	"testing"
+)
 
-func TestDBConn(t *testing.T) {
-	return
-}
-
-func TestMigrateDB(t *testing.T) {
-	return
-}
-
-func TestGetDB(t *testing.T) {
+func TestConn(t *testing.T) {
+	asserts := assert.New(t)
+	_, err := Conn()
+	asserts.NoError(err, "database should connected")
 	return
 }

@@ -40,7 +40,7 @@ func TestNewCellFail(t *testing.T) {
 }
 
 // test db 생성해서 거기서 테스트 하는걸로 ?
-func TestCreateaAndDeleteCell(t *testing.T) {
+func TestCreateAndDeleteCell(t *testing.T) {
 	asserts := assert.New(t)
 	testCell, err := cell.NewCell(1099400.00, 1823700.00)
 	asserts.NoError(err, "테스트용 셀 인스턴스 생성에 실패했습니다.")
@@ -63,7 +63,6 @@ func TestGetCellData(t *testing.T) {
 	result := map[string]interface{}{}
 	db.Model(&cell.DBCell{}).First(&result)
 	asserts.NotEmpty(result, "셀데이터를 데이터베이스에서 가져올 수 없습니다.")
-	return
 }
 
 /*

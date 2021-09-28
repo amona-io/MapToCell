@@ -26,3 +26,4 @@ func TestRequestAPISuccess(t *testing.T) {
 		t.Errorf("%v != %v", statusCode, expected)
 	}
 }
+
