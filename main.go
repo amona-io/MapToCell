@@ -12,6 +12,7 @@ func migrateDB() {
 }
 
 func main() {
+	// dkdkdkdkdkdkdk
 	// 싱글톤 디비 인스턴스
 	DB, err := database.Conn()
 	utils.CheckErr(err)
