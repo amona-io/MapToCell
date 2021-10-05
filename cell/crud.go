@@ -44,3 +44,7 @@ func (c *DBCell) Delete(DB *gorm.DB) error {
 	err := DB.Delete(c).Error
 	return err
 }
+
+func (c *DBCell) GetCellsByRange(DB *gorm.DB, Center string, Range int) error {
+	return nil
+}

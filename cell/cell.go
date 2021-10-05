@@ -25,7 +25,6 @@ type Cell struct {
 }
 var errNoData = errors.New("err No data in this Cell")
 
-
 func AutoMigrate() {
 	db, err := database.Conn()
 	utils.CheckErr(err)
@@ -51,7 +50,7 @@ func NewCell(east float64, north float64) (*Cell, error) {
 	}
 	// Using coords of center, get data of the Cell
 	// If there are no data in Cell, it will return error
-	data, statusCode := Cell.getCellData()
+	data, statusCode := Cell.getCellDataFromAAPI()
 
 	if statusCode != 0 {
 		return nil, errNoData
@@ -76,7 +75,7 @@ func goRoCell(east float64, north float64, c chan <- *Cell)  {
 	}
 	// Using coords of center, get data of the Cell
 	// If there are no data in Cell, it will return error
-	data, statusCode := Cell.getCellData()
+	data, statusCode := Cell.getCellDataFromAAPI()
 
 	if statusCode == 0 {
 		Cell.IsInRange = true
@@ -90,6 +89,7 @@ func goRoCell(east float64, north float64, c chan <- *Cell)  {
 // Once this func retrieve Pointer of Cell, It finds next Cell in the "West Side" of the Previous Cell
 // until no more area information are found.
 func NextCell(prevCell *Cell, cellArray *Array, eastEdge float64, northEdge float64) {
+	totalTimeout := time.After(3000 * time.Millisecond)
 	DB, err := database.Conn()
 	utils.CheckErr(err)
 	centerCoordsArray := strings.Split(prevCell.Center, ",")
@@ -131,25 +131,27 @@ func NextCell(prevCell *Cell, cellArray *Array, eastEdge float64, northEdge floa
 			utils.CheckErr(err)
 			fmt.Printf("%v 번째 : %v\n", turn, Cell.Center)
 			*cellArray = append(*cellArray, Cell)
-		default:	// 채널이 비면 함수 종료
+		case <- totalTimeout:	// 채널이 비면 함수 종료
 			return
 		}
 	}
 }
 
-// getCellData is private func in package "Cell" and it retrieve Cell struct as argument
+// getCellDataFromAAPI is private func in package "Cell" and it retrieve Cell struct as argument
 // It will return area info and status code.
 // If there are any Information of the Cell Area, It returns "Legal Name" of the area in which the Cell is located
 // And It returns "Status Code : 0"
 // But If there are no data in the Cell Area, It returns empty string as Cell Data
-func (c Cell) getCellData() (string, int) {
+func (c Cell) getCellDataFromAAPI() (string, int) {
 	coords := c.Center
 	cellData := naverapi.RequestAPI(coords)
 	statusCode := utils.GetStatusCode(cellData)
 	if statusCode != 0 {
 		return "No Data", statusCode
 	}
+	fmt.Println(cellData)
 	jsonCellData := utils.StringToJSON(cellData)
+	fmt.Println(jsonCellData)
 	areaInfo := getAreaInfo(jsonCellData)
 	return areaInfo, 0
 }
@@ -167,3 +169,4 @@ func getAreaInfo(jsonData map[string]interface{}) string {
 	areaInfo := fmt.Sprintf("%s", strings.TrimRight(rawAreaInfo, " "))
 	return areaInfo
 }
+
