@@ -6,22 +6,22 @@ import (
 	database "handlegeo/db"
 	"handlegeo/naverapi"
 	"handlegeo/utils"
-	"strconv"
 	"strings"
 	"time"
 )
 
 type Array []*Cell
 type Cell struct {
-	LeftTop		string
-	RightTop	string
-	LeftBottom	string
-	RightBottom	string
-	Center		string
-	IsInRange	bool
-	CenterCity	string
-	CreatedAt 	time.Time
-	UpdatedAt 	time.Time
+	LeftTop			string
+	RightTop		string
+	LeftBottom		string
+	RightBottom		string
+	IsInRange		bool
+	CenterCity		string
+	CreatedAt 		time.Time
+	UpdatedAt 		time.Time
+	CenterLatitude 	float64
+	CenterLongitude float64
 }
 var errNoData = errors.New("err No data in this Cell")
 
@@ -36,17 +36,17 @@ func AutoMigrate() {
 // If the "Cell" has not any data, It will return Error
 // The "Cell" is an area of 100m in width and 100m in height centered on the input coords
 func NewCell(east float64, north float64) (*Cell, error) {
-	center := fmt.Sprintf("%.2f,%.2f",east, north)
 	leftTop := fmt.Sprintf("%.2f,%.2f",east-50.00,north+50.00)
 	rightTop := fmt.Sprintf("%.2f,%.2f",east+50.00,north+50.00)
 	leftBottom := fmt.Sprintf("%.2f,%.2f",east-50.00,north-50.00)
 	rightBottom := fmt.Sprintf("%.2f,%.2f",east+50.00,north-50.00)
 	Cell := Cell{
-		Center		: center,
-		LeftTop		: leftTop,
-		RightTop	: rightTop,
-		LeftBottom	: leftBottom,
-		RightBottom	: rightBottom,
+		LeftTop			: leftTop,
+		RightTop		: rightTop,
+		LeftBottom		: leftBottom,
+		RightBottom		: rightBottom,
+		CenterLatitude	: east,
+		CenterLongitude	: north,
 	}
 	// Using coords of center, get data of the Cell
 	// If there are no data in Cell, it will return error
@@ -61,17 +61,19 @@ func NewCell(east float64, north float64) (*Cell, error) {
 }
 
 func goRoCell(east float64, north float64, c chan <- *Cell)  {
-	center := fmt.Sprintf("%.2f,%.2f",east, north)
 	leftTop := fmt.Sprintf("%.2f,%.2f",east-50.00,north+50.00)
 	rightTop := fmt.Sprintf("%.2f,%.2f",east+50.00,north+50.00)
 	leftBottom := fmt.Sprintf("%.2f,%.2f",east-50.00,north-50.00)
 	rightBottom := fmt.Sprintf("%.2f,%.2f",east+50.00,north-50.00)
+	centerLatitude := east
+	centerLongitude := north
 	Cell := Cell{
-		Center		: center,
-		LeftTop		: leftTop,
-		RightTop	: rightTop,
-		LeftBottom	: leftBottom,
-		RightBottom	: rightBottom,
+		LeftTop			: leftTop,
+		RightTop		: rightTop,
+		LeftBottom		: leftBottom,
+		RightBottom		: rightBottom,
+		CenterLatitude	: centerLatitude,
+		CenterLongitude	: centerLongitude,
 	}
 	// Using coords of center, get data of the Cell
 	// If there are no data in Cell, it will return error
@@ -92,19 +94,13 @@ func NextCell(prevCell *Cell, cellArray *Array, eastEdge float64, northEdge floa
 	totalTimeout := time.After(3000 * time.Millisecond)
 	DB, err := database.Conn()
 	utils.CheckErr(err)
-	centerCoordsArray := strings.Split(prevCell.Center, ",")
-
-	east, north := centerCoordsArray[0], centerCoordsArray[1]
-	eastFloat, err := strconv.ParseFloat(east, 64)
-	utils.CheckErr(err)
-	northFloat, err := strconv.ParseFloat(north, 64)
-	utils.CheckErr(err)
+	east, north := prevCell.CenterLatitude, prevCell.CenterLongitude
 
 	margin := 100.00
 
 	ch := make(chan *Cell)
 
-	for eastCoord, northCoord := eastFloat, northFloat; eastCoord <= eastEdge && northCoord <= northEdge; {
+	for eastCoord, northCoord := east, north; eastCoord <= eastEdge && northCoord <= northEdge; {
 		time.Sleep(time.Microsecond * 950)
 		fmt.Printf("가로좌표: %.2f // 세로좌표: %.2f\n", eastCoord, northCoord)
 		if eastCoord >= eastEdge { // eastCoord : 초기화 // northCoord : + 100
@@ -112,7 +108,7 @@ func NextCell(prevCell *Cell, cellArray *Array, eastEdge float64, northEdge floa
 				fmt.Println("종료!!")
 				break
 			} else {
-				eastCoord = eastFloat
+				eastCoord = east
 				go goRoCell(eastCoord, northCoord+margin, ch)
 				northCoord += margin
 			}
@@ -129,7 +125,7 @@ func NextCell(prevCell *Cell, cellArray *Array, eastEdge float64, northEdge floa
 			//err := CreateCellInDb(Cell, DB)
 			err := Cell.Create(DB)
 			utils.CheckErr(err)
-			fmt.Printf("%v 번째 : %v\n", turn, Cell.Center)
+			fmt.Printf("%v 번째 : %v\n", turn, fmt.Sprintf("%.2f,%.2f", Cell.CenterLatitude, Cell.CenterLongitude))
 			*cellArray = append(*cellArray, Cell)
 		case <- totalTimeout:	// 채널이 비면 함수 종료
 			return
@@ -143,7 +139,7 @@ func NextCell(prevCell *Cell, cellArray *Array, eastEdge float64, northEdge floa
 // And It returns "Status Code : 0"
 // But If there are no data in the Cell Area, It returns empty string as Cell Data
 func (c Cell) getCellDataFromAAPI() (string, int) {
-	coords := c.Center
+	coords := utils.JoinFloatToCoord(c.CenterLatitude, c.CenterLongitude)
 	cellData := naverapi.RequestAPI(coords)
 	statusCode := utils.GetStatusCode(cellData)
 	if statusCode != 0 {

@@ -2,6 +2,7 @@ package utils
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"strconv"
 	"strings"
@@ -38,4 +39,9 @@ func SplitCoorsToFloat(coord string) (float64, float64) {
 	longitude, err := strconv.ParseFloat(longitudeStr, 64)
 	CheckErr(err)
 	return latitude, longitude
+}
+
+func JoinFloatToCoord(latitude, longitude float64) string {
+	coord := fmt.Sprintf("%.2f,%.2f", latitude, longitude)
+	return coord
 }

@@ -26,13 +26,14 @@ type BaseModel struct {
 
 type DBCell struct {
 	BaseModel	BaseModel	`gorm:"embedded"`
-	LeftTop		string
-	RightTop	string
-	LeftBottom	string
-	RightBottom	string
-	Center		string
-	IsInRange	bool
-	CenterCity	string
+	LeftTop			string
+	RightTop		string
+	LeftBottom		string
+	RightBottom		string
+	CenterLatitude 	float64
+	CenterLongitude float64
+	IsInRange		bool
+	CenterCity		string
 }
 
 func (c *Cell) Create(DB *gorm.DB) error {
@@ -45,6 +46,13 @@ func (c *DBCell) Delete(DB *gorm.DB) error {
 	return err
 }
 
-func (c *DBCell) GetCellsByRange(DB *gorm.DB, Center string, Range int) error {
-	return nil
+func GetCellsByRange(DB *gorm.DB, centerLatitude, centerLongitude float64, Range float64) []DBCell {
+	minLatitude := centerLatitude-Range
+	maxLatitude := centerLatitude+Range
+	minLongitude := centerLongitude-Range
+	maxLongitude := centerLongitude+Range
+	result := []DBCell{}
+	DB.Where("center_latitude BETWEEN ? AND ?", minLatitude, maxLatitude).
+		Where("center_longitude BETWEEN ? AND ?", minLongitude, maxLongitude).Find(&result)
+	return result
 }

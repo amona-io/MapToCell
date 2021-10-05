@@ -20,7 +20,8 @@ func TestNewCell(t *testing.T) {
 		RightTop: fmt.Sprintf("%.2f,%.2f",east+50.00,north+50.00),
 		LeftBottom: fmt.Sprintf("%.2f,%.2f",east-50.00,north-50.00),
 		RightBottom: fmt.Sprintf("%.2f,%.2f",east+50.00,north-50.00),
-		Center: fmt.Sprintf("%.2f,%.2f", east,north),
+		CenterLatitude: 950000.00,
+		CenterLongitude: 1950000.00,
 		IsInRange: true,
 		CenterCity: "서울특별시 마포구 신수동",
 		CreatedAt: time.Time{},		// Zero Value
