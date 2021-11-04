@@ -33,15 +33,15 @@ func GetStatusCode(resBody string) int {
 
 func SplitCoorsToFloat(coord string) (float64, float64) {
 	coordsArray := strings.Split(coord, ",")
-	latitudeStr, longitudeStr := coordsArray[0], coordsArray[1]
-	latitude, err := strconv.ParseFloat(latitudeStr, 64)
+	XStr, YStr := coordsArray[0], coordsArray[1]
+	x, err := strconv.ParseFloat(XStr, 64)
 	CheckErr(err)
-	longitude, err := strconv.ParseFloat(longitudeStr, 64)
+	y, err := strconv.ParseFloat(YStr, 64)
 	CheckErr(err)
-	return latitude, longitude
+	return x, y
 }
 
-func JoinFloatToCoord(latitude, longitude float64) string {
-	coord := fmt.Sprintf("%.2f,%.2f", latitude, longitude)
+func JoinFloatToCoord(x, y float64) string {
+	coord := fmt.Sprintf("%.2f,%.2f", x, y)
 	return coord
 }

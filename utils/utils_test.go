@@ -40,11 +40,11 @@ func TestGetStatusCodeFail(t *testing.T) {
 
 func TestSplitCoorsToFloat(t *testing.T) {
 	asserts := assert.New(t)
-	actualLatitude := 947800.00
-	actualLongitude := 1943400.00
-	expectedLatitude := 947800.00
-	expectedLongitude := 1943400.00
-	expected := []float64 {expectedLatitude, expectedLongitude}
-	actual := []float64 {actualLatitude, actualLongitude}
+	actualX := 947800.00
+	actualY := 1943400.00
+	expectedX := 947800.00
+	expectedY := 1943400.00
+	expected := []float64 {expectedX, expectedY}
+	actual := []float64 {actualX, actualY}
 	asserts.Equal(expected, actual)
 }
