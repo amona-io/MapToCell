@@ -20,8 +20,8 @@ func RequestAPI(coords string) string {
 
 // queryURLWrapper retrieve coords as string type and it returns query url for communicate with Naver Maps API
 func queryURLWrapper(coords string) string {
-	baseURL := fmt.Sprintf("https://naveropenapi.apigw.ntruss.com/map-reversegeocode/v2/gc?sourcecrs=nhn:2048&coords=%s&output=json", coords)	// UTM-K (동-서,북-남)
-	//baseURL := fmt.Sprintf("https://naveropenapi.apigw.ntruss.com/map-reversegeocode/v2/gc?coords=%s&output=json", coords)
+	//baseURL := fmt.Sprintf("https://naveropenapi.apigw.ntruss.com/map-reversegeocode/v2/gc?sourcecrs=nhn:2048&coords=%s&output=json", coords)	// UTM-K (동-서,북-남)
+	baseURL := fmt.Sprintf("https://naveropenapi.apigw.ntruss.com/map-reversegeocode/v2/gc?coords=%s&output=json", coords)
 	return baseURL
 }
 

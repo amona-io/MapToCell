@@ -1,6 +1,7 @@
 package naverapi_test
 
 import (
+	"fmt"
 	"github.com/google/go-cmp/cmp"
 	"handlegeo/naverapi"
 	"handlegeo/utils"
@@ -17,7 +18,7 @@ func TestRequestAPINoData(t *testing.T) {
 	}
 }
 
-func TestRequestAPISuccess(t *testing.T) {
+func TestRequestAPISuccessUtmK(t *testing.T) {
 	coords := "950000.00,1950000.00"
 	actual := naverapi.RequestAPI(coords)
 	statusCode := utils.GetStatusCode(actual)
@@ -27,3 +28,13 @@ func TestRequestAPISuccess(t *testing.T) {
 	}
 }
 
+func TestRequestAPISuccessEpsg4326(t *testing.T) {
+	coords := "14128835.436665,4512803.931443"
+	actual := naverapi.RequestAPI(coords)
+	fmt.Println(actual)
+	statusCode := utils.GetStatusCode(actual)
+	expected := 0
+	if !cmp.Equal(statusCode, expected) {
+		t.Errorf("%v != %v", statusCode, expected)
+	}
+}
