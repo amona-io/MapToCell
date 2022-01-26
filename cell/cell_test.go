@@ -10,22 +10,25 @@ import (
 	"time"
 )
 
+const xMargin = 0.0011317962
+const yMargin = 0.0008983153
+
 func TestNewCell(t *testing.T) {
-	east := 950000.00
-	north := 1950000.00
+	east := 127.107096
+	north := 37.631880
 
 	actual, _ := cell.NewCell(east, north)
 	expected := &cell.Cell{
-		LeftTop:     fmt.Sprintf("%.2f,%.2f",east-50.00,north+50.00),
-		RightTop:    fmt.Sprintf("%.2f,%.2f",east+50.00,north+50.00),
-		LeftBottom:  fmt.Sprintf("%.2f,%.2f",east-50.00,north-50.00),
-		RightBottom: fmt.Sprintf("%.2f,%.2f",east+50.00,north-50.00),
-		CenterX:     950000.00,
-		CenterY:     1950000.00,
+		LeftTop:     fmt.Sprintf("%.18f,%.18f", east-(xMargin/2), north+(yMargin/2)),
+		RightTop:    fmt.Sprintf("%.18f,%.18f", east+(xMargin/2), north+(yMargin/2)),
+		LeftBottom:  fmt.Sprintf("%.18f,%.18f", east-(xMargin/2), north-(yMargin/2)),
+		RightBottom: fmt.Sprintf("%.18f,%.18f", east+(xMargin/2), north-(yMargin/2)),
+		CenterX:     east,
+		CenterY:     north,
 		IsInRange:   true,
-		CenterCity:  "서울특별시 마포구 신수동",
-		CreatedAt:   time.Time{},		// Zero Value
-		UpdatedAt:   time.Time{},		// Zero Value
+		CenterCity:  "경기도 구리시 갈매동",
+		CreatedAt:   time.Time{}, // Zero Value
+		UpdatedAt:   time.Time{}, // Zero Value
 	}
 	if !cmp.Equal(actual, expected) {
 		t.Errorf("%v != %v", *actual, *expected)
@@ -43,7 +46,7 @@ func TestNewCellFail(t *testing.T) {
 // test db 생성해서 거기서 테스트 하는걸로 ?
 func TestCreateAndDeleteCell(t *testing.T) {
 	asserts := assert.New(t)
-	testCell, err := cell.NewCell(1099400.00, 1823700.00)
+	testCell, err := cell.NewCell(127.107096, 37.631880)
 	asserts.NoError(err, "테스트용 셀 인스턴스 생성에 실패했습니다.")
 
 	db, err := database.Conn()

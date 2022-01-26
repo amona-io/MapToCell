@@ -26,6 +26,9 @@ type Cell struct {
 	Deactivate  bool
 }
 
+const xMargin = 0.0011317962
+const yMargin = 0.0008983153
+
 var errNoData = errors.New("err No data in this Cell")
 
 func AutoMigrate() {
@@ -39,10 +42,10 @@ func AutoMigrate() {
 // If the "Cell" has not any data, It will return Error
 // The "Cell" is an area of 100m in width and 100m in height centered on the input coords
 func NewCell(east float64, north float64) (*Cell, error) {
-	leftTop := fmt.Sprintf("%.18f,%.18f", east-0.0005658981, north+0.00044915765)
-	rightTop := fmt.Sprintf("%.18f,%.18f", east+0.0005658981, north+0.00044915765)
-	leftBottom := fmt.Sprintf("%.18f,%.18f", east-0.0005658981, north-0.00044915765)
-	rightBottom := fmt.Sprintf("%.18f,%.18f", east+0.0005658981, north-0.00044915765)
+	leftTop := fmt.Sprintf("%.18f,%.18f", east-(xMargin/2), north+(yMargin/2))
+	rightTop := fmt.Sprintf("%.18f,%.18f", east+(xMargin/2), north+(yMargin/2))
+	leftBottom := fmt.Sprintf("%.18f,%.18f", east-(xMargin/2), north-(yMargin/2))
+	rightBottom := fmt.Sprintf("%.18f,%.18f", east+(xMargin/2), north-(yMargin/2))
 	Cell := Cell{
 		LeftTop:     leftTop,
 		RightTop:    rightTop,
@@ -65,10 +68,10 @@ func NewCell(east float64, north float64) (*Cell, error) {
 }
 
 func goRoCell(east float64, north float64, c chan<- *Cell) {
-	leftTop := fmt.Sprintf("%.18f,%.18f", east-0.0005658981, north+0.00044915765)
-	rightTop := fmt.Sprintf("%.18f,%.18f", east+0.0005658981, north+0.00044915765)
-	leftBottom := fmt.Sprintf("%.18f,%.18f", east-0.0005658981, north-0.00044915765)
-	rightBottom := fmt.Sprintf("%.18f,%.18f", east+0.0005658981, north-0.00044915765)
+	leftTop := fmt.Sprintf("%.18f,%.18f", east-(xMargin/2), north+(yMargin/2))
+	rightTop := fmt.Sprintf("%.18f,%.18f", east+(xMargin/2), north+(yMargin/2))
+	leftBottom := fmt.Sprintf("%.18f,%.18f", east-(xMargin/2), north-(yMargin/2))
+	rightBottom := fmt.Sprintf("%.18f,%.18f", east+(xMargin/2), north-(yMargin/2))
 	centerX := east
 	centerY := north
 	Cell := Cell{
@@ -100,13 +103,10 @@ func goRoCell(east float64, north float64, c chan<- *Cell) {
 // until no more area information are found.
 func NextCell(prevCell *Cell, cellArray *Array, eastEdge float64, northEdge float64, DB *gorm.DB) {
 	totalTimeout := time.After(8 * 60 * 60 * time.Second)
-	//DB, err := database.Conn()
-	//utils.CheckErr(err)
 	east, north := prevCell.CenterX, prevCell.CenterY
 
-	//margin := 100.00
-	xMargin := 0.0011317962
-	yMargin := 0.0008983153
+	//xMargin := 0.0011317962
+	//yMargin := 0.0008983153
 
 	ch := make(chan *Cell)
 
@@ -138,7 +138,7 @@ func NextCell(prevCell *Cell, cellArray *Array, eastEdge float64, northEdge floa
 			turn += 1
 			err := Cell.Create(DB)
 			utils.CheckErr(err)
-			fmt.Printf("%v 번째 : %v\n", turn, fmt.Sprintf("%.2f,%.2f", Cell.CenterX, Cell.CenterY))
+			fmt.Printf("%v 번째 : %v\n", turn, fmt.Sprintf("%.18f,%.18f", Cell.CenterX, Cell.CenterY))
 		case <-totalTimeout: // 채널이 비면 함수 종료
 			return
 		}

@@ -29,7 +29,7 @@ func TestRequestAPISuccessUtmK(t *testing.T) {
 }
 
 func TestRequestAPISuccessEpsg4326(t *testing.T) {
-	coords := "14128835.436665,4512803.931443"
+	coords := "127.107096,37.631880"
 	actual := naverapi.RequestAPI(coords)
 	fmt.Println(actual)
 	statusCode := utils.GetStatusCode(actual)
