@@ -22,6 +22,4 @@
 /vendor/
 /Godeps/
 
-# Security Constants
-/const/
 # End of https://www.toptal.com/developers/gitignore/api/go
