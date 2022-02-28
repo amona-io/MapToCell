@@ -11,6 +11,7 @@ import (
 
 // RequestAPI returns the Area Information data for the input coords as a JSON String
 func RequestAPI(coords string) string {
+	fmt.Println(coords)
 	queryURL := queryURLWrapper(coords)
 	res := getResponse(queryURL)
 	resBody := resBodyToString(res.Body)
@@ -19,9 +20,10 @@ func RequestAPI(coords string) string {
 }
 
 // queryURLWrapper retrieve coords as string type and it returns query url for communicate with Naver Maps API
+// 군사보안 목적으로 법정동을 정상적으로 리턴하지 않는 경우 -> orders=admcode 파라미터를 추가하여 법정동을 요청하면 정상적으로 받아올 수 있음
 func queryURLWrapper(coords string) string {
-	//baseURL := fmt.Sprintf("https://naveropenapi.apigw.ntruss.com/map-reversegeocode/v2/gc?sourcecrs=nhn:2048&coords=%s&output=json", coords)	// UTM-K (동-서,북-남)
 	baseURL := fmt.Sprintf("https://naveropenapi.apigw.ntruss.com/map-reversegeocode/v2/gc?coords=%s&output=json", coords)
+	//baseURL := fmt.Sprintf("https://naveropenapi.apigw.ntruss.com/map-reversegeocode/v2/gc?orders=admcode&coords=%s&output=json", coords)
 	return baseURL
 }
 

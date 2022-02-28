@@ -42,6 +42,6 @@ func SplitCoorsToFloat(coord string) (float64, float64) {
 }
 
 func JoinFloatToCoord(x, y float64) string {
-	coord := fmt.Sprintf("%.2f,%.2f", x, y)
+	coord := fmt.Sprintf("%.18f,%.18f", x, y)
 	return coord
 }

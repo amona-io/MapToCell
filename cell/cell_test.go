@@ -19,10 +19,10 @@ func TestNewCell(t *testing.T) {
 
 	actual, _ := cell.NewCell(east, north)
 	expected := &cell.Cell{
-		LeftTop:     fmt.Sprintf("%.18f,%.18f", east-(xMargin/2), north+(yMargin/2)),
-		RightTop:    fmt.Sprintf("%.18f,%.18f", east+(xMargin/2), north+(yMargin/2)),
-		LeftBottom:  fmt.Sprintf("%.18f,%.18f", east-(xMargin/2), north-(yMargin/2)),
-		RightBottom: fmt.Sprintf("%.18f,%.18f", east+(xMargin/2), north-(yMargin/2)),
+		LeftTop:     fmt.Sprintf("%.10f,%.10f", east-(xMargin/2), north+(yMargin/2)),
+		RightTop:    fmt.Sprintf("%.10f,%.10f", east+(xMargin/2), north+(yMargin/2)),
+		LeftBottom:  fmt.Sprintf("%.10f,%.10f", east-(xMargin/2), north-(yMargin/2)),
+		RightBottom: fmt.Sprintf("%.10f,%.10f", east+(xMargin/2), north-(yMargin/2)),
 		CenterX:     east,
 		CenterY:     north,
 		IsInRange:   true,

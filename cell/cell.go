@@ -23,7 +23,6 @@ type Cell struct {
 	UpdatedAt   time.Time
 	CenterX     float64
 	CenterY     float64
-	Deactivate  bool
 }
 
 const xMargin = 0.0011317962
@@ -42,10 +41,10 @@ func AutoMigrate() {
 // If the "Cell" has not any data, It will return Error
 // The "Cell" is an area of 100m in width and 100m in height centered on the input coords
 func NewCell(east float64, north float64) (*Cell, error) {
-	leftTop := fmt.Sprintf("%.18f,%.18f", east-(xMargin/2), north+(yMargin/2))
-	rightTop := fmt.Sprintf("%.18f,%.18f", east+(xMargin/2), north+(yMargin/2))
-	leftBottom := fmt.Sprintf("%.18f,%.18f", east-(xMargin/2), north-(yMargin/2))
-	rightBottom := fmt.Sprintf("%.18f,%.18f", east+(xMargin/2), north-(yMargin/2))
+	leftTop := fmt.Sprintf("%.10f,%.10f", east-(xMargin/2), north+(yMargin/2))
+	rightTop := fmt.Sprintf("%.10f,%.10f", east+(xMargin/2), north+(yMargin/2))
+	leftBottom := fmt.Sprintf("%.10f,%.10f", east-(xMargin/2), north-(yMargin/2))
+	rightBottom := fmt.Sprintf("%.10f,%.10f", east+(xMargin/2), north-(yMargin/2))
 	Cell := Cell{
 		LeftTop:     leftTop,
 		RightTop:    rightTop,
@@ -53,25 +52,26 @@ func NewCell(east float64, north float64) (*Cell, error) {
 		RightBottom: rightBottom,
 		CenterX:     east,
 		CenterY:     north,
-		Deactivate:  false,
 	}
 	// Using coords of center, get data of the Cell
 	// If there are no data in Cell, it will return error
 	data, statusCode := Cell.getCellDataFromAPI()
 
-	if statusCode != 0 {
-		return nil, errNoData
+	if statusCode == 0 {
+		Cell.IsInRange = true
+		Cell.CenterCity = data
+	} else {
+		Cell.IsInRange = false
+		Cell.CenterCity = "없음"
 	}
-	Cell.IsInRange = true
-	Cell.CenterCity = data
 	return &Cell, nil
 }
 
 func goRoCell(east float64, north float64, c chan<- *Cell) {
-	leftTop := fmt.Sprintf("%.18f,%.18f", east-(xMargin/2), north+(yMargin/2))
-	rightTop := fmt.Sprintf("%.18f,%.18f", east+(xMargin/2), north+(yMargin/2))
-	leftBottom := fmt.Sprintf("%.18f,%.18f", east-(xMargin/2), north-(yMargin/2))
-	rightBottom := fmt.Sprintf("%.18f,%.18f", east+(xMargin/2), north-(yMargin/2))
+	leftTop := fmt.Sprintf("%.10f,%.10f", east-(xMargin/2), north+(yMargin/2))
+	rightTop := fmt.Sprintf("%.10f,%.10f", east+(xMargin/2), north+(yMargin/2))
+	leftBottom := fmt.Sprintf("%.10f,%.10f", east-(xMargin/2), north-(yMargin/2))
+	rightBottom := fmt.Sprintf("%.10f,%.10f", east+(xMargin/2), north-(yMargin/2))
 	centerX := east
 	centerY := north
 	Cell := Cell{
@@ -81,11 +81,11 @@ func goRoCell(east float64, north float64, c chan<- *Cell) {
 		RightBottom: rightBottom,
 		CenterX:     centerX,
 		CenterY:     centerY,
-		Deactivate:  false,
 	}
 	// Using coords of center, get data of the Cell
 	// If there are no data in Cell, it will return error
 	data, statusCode := Cell.getCellDataFromAPI()
+	fmt.Println(data)
 
 	if statusCode == 0 {
 		Cell.IsInRange = true
@@ -98,11 +98,35 @@ func goRoCell(east float64, north float64, c chan<- *Cell) {
 	}
 }
 
+func UpdateAllCells(cellArray []DBCell, DB *gorm.DB) {
+	now := 1
+	all := len(cellArray)
+	fmt.Println(all)
+	for _, dbCell := range cellArray {
+		fmt.Println(now)
+		Cell := Cell{
+			LeftTop:     dbCell.LeftTop,
+			LeftBottom:  dbCell.LeftBottom,
+			RightTop:    dbCell.RightTop,
+			RightBottom: dbCell.RightBottom,
+			CenterX:     dbCell.CenterX,
+			CenterY:     dbCell.CenterY,
+		}
+		data, statusCode := Cell.getCellDataFromAPI()
+		if statusCode == 0 {
+			dbCell.CenterCity = data
+			DB.Save(&dbCell)
+		}
+		fmt.Printf("진행률 %d / %d\n", now, all)
+		now += 1
+	}
+}
+
 // NextCell is recursive func and It retrieve Pointer of Cell(Previous Cell) and Array of these Cell.
 // Once this func retrieve Pointer of Cell, It finds next Cell in the "West Side" of the Previous Cell
 // until no more area information are found.
 func NextCell(prevCell *Cell, cellArray *Array, eastEdge float64, northEdge float64, DB *gorm.DB) {
-	totalTimeout := time.After(8 * 60 * 60 * time.Second)
+	totalTimeout := time.After(18 * 60 * 60 * time.Second)
 	east, north := prevCell.CenterX, prevCell.CenterY
 
 	//xMargin := 0.0011317962
@@ -112,8 +136,8 @@ func NextCell(prevCell *Cell, cellArray *Array, eastEdge float64, northEdge floa
 
 	//for eastCoord, northCoord := east, north; eastCoord <= eastEdge && northCoord <= northEdge; {
 	for eastCoord, northCoord := east, north; true; {
-		time.Sleep(time.Microsecond * 7500)
-		fmt.Printf("가로좌표: %.18f // 세로좌표: %.18f\n", eastCoord, northCoord)
+		time.Sleep(time.Microsecond * 9000)
+		fmt.Printf("가로좌표: %.10f // 세로좌표: %.10f\n", eastCoord, northCoord)
 		if eastCoord >= eastEdge { // eastCoord : 초기화 // northCoord : + 100
 			fmt.Println("there")
 			if northCoord >= northEdge {
@@ -157,9 +181,7 @@ func (c Cell) getCellDataFromAPI() (string, int) {
 	if statusCode != 0 {
 		return "No Data", statusCode
 	}
-	fmt.Println(cellData)
 	jsonCellData := utils.StringToJSON(cellData)
-	fmt.Println(jsonCellData)
 	areaInfo := getAreaInfo(jsonCellData)
 	return areaInfo, 0
 }
