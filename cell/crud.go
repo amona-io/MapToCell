@@ -92,3 +92,17 @@ func GetCellsByMinMax(DB *gorm.DB, minX, minY, maxX, maxY float64) []DBCell {
 		Where("center_y BETWEEN ? AND ?", minY, maxY).Find(&result)
 	return result
 }
+
+func GetCellsByAreaId(DB *gorm.DB, areaId int) []DBCell {
+	fmt.Println("find")
+	result := []DBCell{}
+	DB.Where("area_id = ?", areaId).Find(&result)
+	return result
+}
+
+func GetCellsByAreaIds(DB *gorm.DB, areaIds []int) []DBCell {
+	fmt.Println("find")
+	result := []DBCell{}
+	DB.Where("area_id IN ?", areaIds).Find(&result)
+	return result
+}

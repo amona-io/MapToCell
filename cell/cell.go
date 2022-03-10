@@ -136,7 +136,7 @@ func NextCell(prevCell *Cell, cellArray *Array, eastEdge float64, northEdge floa
 
 	//for eastCoord, northCoord := east, north; eastCoord <= eastEdge && northCoord <= northEdge; {
 	for eastCoord, northCoord := east, north; true; {
-		time.Sleep(time.Microsecond * 9000)
+		time.Sleep(time.Microsecond * 10000)
 		fmt.Printf("가로좌표: %.10f // 세로좌표: %.10f\n", eastCoord, northCoord)
 		if eastCoord >= eastEdge { // eastCoord : 초기화 // northCoord : + 100
 			fmt.Println("there")

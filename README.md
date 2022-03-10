@@ -64,7 +64,15 @@ go run main.go
 ```
 
 
-# TODO.
-- REST API 혹은 CLI 로 컨트롤할 수 있는 환경 만들기
-- 코드 주석 한글로 달기
-- 입력된 셀 관리 기능 추가
+# ETC
+- 중복되는 셀을 제거하는 SQL 쿼리
+  ```
+  delete from cells
+    where id NOT IN (
+      SELECT * from (
+        SELECT MIN(id)
+        FROM cells
+        GROUP BY round(center_x, 6), round(center_y, 6)
+      ) AS tempTable
+  );
+  ```
