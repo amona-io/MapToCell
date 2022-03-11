@@ -1,17 +1,9 @@
 package _const
 
 const (
-	//NCPKEYID = "mq9biarq8p"
-	//NCPKEY   = "dhYLDFt88KIiuehGzNUsb4mnEuoyfyQywEvJH8hU"
-
-	NCPKEYID = "o2h1p3y2g3"
-	NCPKEY   = "XQwNE3H0FW9oR0tfkhVdiCfuTVWuZfX2RNo1fwOX"
-
-	//NCPKEYID = "2p449y77e5"
-	//NCPKEY   = "vehE0ooYWMXbXgamHvs0NFJZM5GEswMHgX8s6ujM"
-
-	//NCPKEYID = "zzpdqm68bu"
-	//NCPKEY   = "d7jpVi01X6e7US5DyIqGFJvPDEzccV7kYZtWPgnY"
+	// NCPKEYID & NCPKEY https://docs.google.com/spreadsheets/d/19_D62UvhJw9DisvNwlAGu0Ge9lHyd8YslnELxNwBv48/edit#gid=227441448
+	NCPKEYID = "s5iu27quhv"
+	NCPKEY   = "qr2EKSg8aHjzzpiXDWU7wdvGTMcIbC3y2a2NULvE"
 
 	//dev
 	//MYSQLUSER = "msg_dev"
